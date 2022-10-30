@@ -25,9 +25,14 @@ router.post("/:setName", (req,res) => {
 
 router.get("/", async (req, res) => {
     const {page} = req.query;
+    if(!page) return res.sendStatus(422)
+    const userId = req.user.dataValues.id;
     const setsName = await sets.findAndCountAll({
         limit: 100,
-        offset: page * 100
+        offset: page * 100,
+        where: {
+            user_id: userId
+        }
     })
     res.send(setsName)
 })
