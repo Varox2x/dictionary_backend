@@ -13,7 +13,8 @@ router.post("/:setName", (req,res) => {
     const {setName} = req.params;
     console.log(setName)
     if(!setName || !isNaN(setName)) return res.sendStatus(422)
-    setInstance.createSet(1, setName)
+    const userId = req.user.dataValues.id;
+    setInstance.createSet(userId, setName)
         .then(r => {
             res.send(setName);
         })

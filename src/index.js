@@ -6,7 +6,8 @@ const passport = require('passport')
 const session = require('express-session')
 const authRoute = require('./routes/auth')
 const setRoute = require('./routes/sets')
-const setInstance = require('./instances/setInstance')
+const wordRoute = require('./routes/words')
+
 require('./strategies/local.js')
 dotenv.config();
 
@@ -27,15 +28,13 @@ app.use(
 app.use(express.json());
 app.use(passport.initialize());
 app.use(passport.session())
+app.use(function errorHandler(err, req, res, next) { res.send('error happened ' + err.message) });
 
 app.use(('/auth'), authRoute);
 app.use(('/dictionary/set'), setRoute);
+app.use(('/dictionary/word'), wordRoute);
 
-// for(let i = 0; i < 25; i++){
-//     setInstance.createSet(1, `test${i}`)
-//     .then(r => console.log(r))
-//     .catch(r => console.log(r))
-// }
+
 
 
 app.listen(PORT, () => {
