@@ -1,6 +1,6 @@
 const { Router } = require("express");
 const router = Router();
-const { sets, words, words_sets } = require("../database/models");
+const { sets, words, words_sets, users } = require("../database/models");
 const setInstance = require("../instances/setInstance");
 const db = require("../database/databse");
 
@@ -27,6 +27,9 @@ router.get("/", async (req, res) => {
 	const { page } = req.query;
 	if (!page) return res.sendStatus(422);
 	const userId = req.user.dataValues.id;
+	let userName = await users.findOne({ where: { id: userId } });
+	console.log("userName.dataValues.email");
+	console.log(userName.dataValues.email);
 	let setsName = await sets.findAndCountAll({
 		limit: 100,
 		offset: page * 100,
@@ -35,7 +38,10 @@ router.get("/", async (req, res) => {
 		},
 	});
 	setsName.rows = setsName.rows.map(({ name }) => name);
-	res.send(setsName);
+	res.send({
+		username: userName,
+		sets: setsName,
+	});
 });
 
 router.get("/:setName", async (req, res) => {
