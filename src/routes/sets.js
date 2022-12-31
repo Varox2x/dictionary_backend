@@ -39,7 +39,7 @@ router.get("/", async (req, res) => {
 	});
 	setsName.rows = setsName.rows.map(({ name }) => name);
 	res.send({
-		username: userName,
+		username: userName.email,
 		sets: setsName,
 	});
 });
