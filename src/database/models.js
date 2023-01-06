@@ -78,8 +78,47 @@ const words_sets = db.define("words_sets", {
 	},
 });
 
+//table permission
+// set_id - setreference
+// user_id - user we want to have permission
+
+const permissions = db.define(
+	"permissions",
+	{
+		set_id: {
+			type: DataTypes.INTEGER,
+			allowNull: false,
+			references: {
+				model: "sets",
+				key: "id",
+			},
+		},
+		user_id: {
+			type: DataTypes.INTEGER,
+			allowNull: false,
+			references: {
+				model: "users",
+				key: "id",
+			},
+		},
+		enableEdit: {
+			type: DataTypes.BOOLEAN,
+			allowNull: false,
+			defaultValue: false,
+		},
+	},
+	{
+		indexes: [
+			{
+				unique: true,
+				fields: ["user_id", "set_id"],
+			},
+		],
+	}
+);
+
 db.sync().then(() => {
 	console.log("Tables Created");
 });
 
-module.exports = { users, sets, words, words_sets };
+module.exports = { users, sets, words, words_sets, permissions };
