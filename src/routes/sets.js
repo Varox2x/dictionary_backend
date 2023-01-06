@@ -115,12 +115,46 @@ router.get("/getOtherSet/:user/:setName", async (req, res) => {
 	}
 	console.log(user);
 	console.log(setName);
-	//usyskaj z nazwy user id danego usera - jesli nie ma w resp wyrzuc błąd
-	//poszukaj w tabeli set id o nazwie setname oraz userId - jesli nie ma wyrzuc blad
-	// sprawdz w tabeli premissions po user id (ten wysylajacy zapytanie) oraz set_id czy istnieje (jesli nie zwroc blad) jesli tak zwroc editable
-	//pobierz wyrazy z setu
-	//w resp wyrzuć nazwe setu, imie wlasciciela setu, wyrazy[]
-	res.sendStatus(200);
+	const userResponse = await users.findOne({ where: { email: user } });
+	if (!userResponse) {
+		// wuslij info o braku usera
+		return res.sendStatus(400);
+	}
+	const permnissionuserId = userResponse.dataValues.id;
+	const setResponse = await sets.findOne({
+		where: { user_id: permnissionuserId, name: setName },
+	});
+	if (!setResponse) {
+		//wyrzuc info o braku takiego zestawu
+		return res.sendStatus(400);
+	}
+	const setId = setResponse.dataValues.id;
+	const permissionResponse = await permissions.findOne({
+		where: { user_id: permnissionuserId, set_id: setId },
+	});
+	console.log(permissionResponse);
+	if (!permissionResponse) {
+		//wyrzucic blad brak uprawnien
+		return res.sendStatus(400);
+	}
+	const enableEdit = permissionResponse.dataValues.editable;
+	db.query(
+		`SELECT words.name, words.definition, words.lvl FROM words INNER JOIN words_sets ON words.id = words_sets.word_id  INNER JOIN sets ON words_sets.set_id = sets.id WHERE sets.user_id = ${permnissionuserId} AND sets.name = '${setName}'`,
+		[permnissionuserId, setName]
+	)
+		.then((r) => {
+			console.log(r[0]);
+			return res.send({
+				words: r[0],
+				enableEdit: enableEdit ? true : false,
+				setName: setName,
+				owner: user,
+			});
+		})
+		.catch((r) => {
+			console.log(r);
+			return res.sendStatus(422);
+		});
 });
 
 module.exports = router;
