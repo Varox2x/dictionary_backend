@@ -53,23 +53,24 @@ router.get("/", async (req, res) => {
 
 router.get("/:setName", async (req, res) => {
 	const { setName } = req.params;
-	console.log("setName");
-	console.log(setName);
 	if (!setName) return res.sendStatus(422);
 	const userId = req.user.dataValues.id;
 
-	console.log(userId);
-	db.query(
-		`SELECT Words.name, Words.definition, Words.lvl FROM Words INNER JOIN Words_sets ON Words.id = Words_sets.WordId  INNER JOIN Sets ON Words_sets.SetId = Sets.id WHERE Sets.user_id = ${userId} AND Sets.name = '${setName}'`,
-		[userId, setName]
-	)
-		.then((r) => {
-			console.log(r[0]);
-			res.send(r[0]);
+	await setInstance
+		.getCurrentUserSet(userId, setName)
+		.then((words) => {
+			const data = words.map((word) => {
+				return {
+					name: word.name,
+					definition: word.definition,
+					lvl: word.lvl,
+				};
+			});
+			res.send(data);
 		})
 		.catch((r) => {
 			console.log(r);
-			res.sendStatus(422);
+			res.sendStatus(403);
 		});
 });
 

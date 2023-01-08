@@ -17,6 +17,19 @@ const createSet = async (user_id, name) => {
 		});
 };
 
+const getCurrentUserSet = async (user_id, name) => {
+	let set;
+	return Sets.findOne({ where: { user_id: user_id, name: name } }).then((r) => {
+		set = r;
+		if (!r) throw "no such set";
+		return set
+			.getWords({ raw: true, attributes: ["name", "definition", "lvl"] })
+			.then((r) => {
+				return r;
+			});
+	});
+};
+
 const createPermissions = async (user_id, set_id, enableEdit) => {
 	const permission = permissions.build({
 		user_id: user_id,
@@ -39,4 +52,5 @@ const createPermissions = async (user_id, set_id, enableEdit) => {
 };
 
 exports.createSet = createSet;
+exports.getCurrentUserSet = getCurrentUserSet;
 exports.createPermissions = createPermissions;
