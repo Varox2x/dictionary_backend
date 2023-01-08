@@ -1,6 +1,6 @@
 const { Router } = require("express");
 const router = Router();
-const { words, words_sets, sets } = require("../database/models");
+const { Words, Words_sets, Sets } = require("../database/models");
 const wordInstance = require("../instances/wordInstance");
 
 router.use((req, res, next) => {
@@ -21,13 +21,12 @@ router.post("/", (req, res) => {
 		.createWord(name, definition, lvl)
 		.then((r) => {
 			const wordId = r.dataValues.id;
-			sets
-				.findOne({
-					where: {
-						name: setName || "no set",
-						user_id: userId,
-					},
-				})
+			Sets.findOne({
+				where: {
+					name: setName || "no set",
+					user_id: userId,
+				},
+			})
 				.then((r) => {
 					const setId = r.dataValues.id;
 					console.log(`set id: ${setId}`);

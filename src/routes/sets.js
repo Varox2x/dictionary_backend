@@ -1,10 +1,10 @@
 const { Router } = require("express");
 const router = Router();
 const {
-	sets,
-	words,
-	words_sets,
-	users,
+	Sets,
+	Words,
+	Words_sets,
+	Users,
 	permissions,
 } = require("../database/models");
 const setInstance = require("../instances/setInstance");
@@ -34,10 +34,10 @@ router.get("/", async (req, res) => {
 	const { page } = req.query;
 	if (!page) return res.sendStatus(422);
 	const userId = req.user.dataValues.id;
-	let userName = await users.findOne({ where: { id: userId } });
+	let userName = await Users.findOne({ where: { id: userId } });
 	console.log("userName.dataValues.email");
 	console.log(userName.dataValues.email);
-	let setsName = await sets.findAndCountAll({
+	let setsName = await Sets.findAndCountAll({
 		limit: 100,
 		offset: page * 100,
 		where: {
@@ -60,7 +60,7 @@ router.get("/:setName", async (req, res) => {
 
 	console.log(userId);
 	db.query(
-		`SELECT words.name, words.definition, words.lvl FROM words INNER JOIN words_sets ON words.id = words_sets.word_id  INNER JOIN sets ON words_sets.set_id = sets.id WHERE sets.user_id = ${userId} AND sets.name = '${setName}'`,
+		`SELECT Words.name, Words.definition, Words.lvl FROM Words INNER JOIN Words_sets ON Words.id = Words_sets.WordId  INNER JOIN Sets ON Words_sets.SetId = Sets.id WHERE Sets.user_id = ${userId} AND Sets.name = '${setName}'`,
 		[userId, setName]
 	)
 		.then((r) => {
@@ -81,10 +81,10 @@ router.post("/permissions/add", async (req, res) => {
 	console.log(user);
 	console.log(setName);
 	const userId = req.user.dataValues.id;
-	const setRespons = await sets.findOne({
+	const setRespons = await Sets.findOne({
 		where: { user_id: userId, name: setName },
 	});
-	const userResponse = await users.findOne({ where: { email: user } });
+	const userResponse = await Users.findOne({ where: { email: user } });
 	if (!setRespons || !userResponse) {
 		return res.sendStatus(400);
 	}
@@ -115,13 +115,13 @@ router.get("/getOtherSet/:user/:setName", async (req, res) => {
 	}
 	console.log(user);
 	console.log(setName);
-	const userResponse = await users.findOne({ where: { email: user } });
+	const userResponse = await Users.findOne({ where: { email: user } });
 	if (!userResponse) {
 		// wuslij info o braku usera
 		return res.sendStatus(400);
 	}
 	const permnissionuserId = userResponse.dataValues.id;
-	const setResponse = await sets.findOne({
+	const setResponse = await Sets.findOne({
 		where: { user_id: permnissionuserId, name: setName },
 	});
 	if (!setResponse) {
@@ -139,7 +139,7 @@ router.get("/getOtherSet/:user/:setName", async (req, res) => {
 	}
 	const enableEdit = permissionResponse.dataValues.editable;
 	db.query(
-		`SELECT words.name, words.definition, words.lvl FROM words INNER JOIN words_sets ON words.id = words_sets.word_id  INNER JOIN sets ON words_sets.set_id = sets.id WHERE sets.user_id = ${permnissionuserId} AND sets.name = '${setName}'`,
+		`SELECT Words.name, Words.definition, Words.lvl FROM Words INNER JOIN Words_sets ON Words.id = Words_sets.WordId  INNER JOIN Sets ON Words_sets.SetId = Sets.id WHERE Sets.user_id = ${permnissionuserId} AND Sets.name = '${setName}'`,
 		[permnissionuserId, setName]
 	)
 		.then((r) => {

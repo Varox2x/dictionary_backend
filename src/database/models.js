@@ -1,8 +1,8 @@
 const { DataTypes } = require("sequelize");
 const db = require("./databse");
 
-const users = db.define(
-	"users",
+const Users = db.define(
+	"Users",
 	{
 		email: {
 			type: DataTypes.STRING,
@@ -17,14 +17,14 @@ const users = db.define(
 	{}
 );
 
-const sets = db.define(
-	"sets",
+const Sets = db.define(
+	"Sets",
 	{
 		user_id: {
 			type: DataTypes.INTEGER,
 			allowNull: false,
 			references: {
-				model: "users",
+				model: "Users",
 				key: "id",
 			},
 		},
@@ -43,7 +43,7 @@ const sets = db.define(
 	}
 );
 
-const words = db.define("words", {
+const Words = db.define("Words", {
 	name: {
 		type: DataTypes.STRING,
 		allowNull: true,
@@ -59,24 +59,19 @@ const words = db.define("words", {
 	},
 });
 
-const words_sets = db.define("words_sets", {
-	set_id: {
-		type: DataTypes.INTEGER,
-		allowNull: false,
-		references: {
-			model: "sets",
-			key: "id",
+const Words_sets = db.define(
+	"Words_sets",
+	{
+		words_setsId: {
+			type: DataTypes.INTEGER,
+			primaryKey: true,
+			autoIncrement: true,
 		},
 	},
-	word_id: {
-		type: DataTypes.INTEGER,
-		allowNull: false,
-		references: {
-			model: "words",
-			key: "id",
-		},
-	},
-});
+	{
+		timestamps: false,
+	}
+);
 
 //table permission
 // set_id - setreference
@@ -89,7 +84,7 @@ const permissions = db.define(
 			type: DataTypes.INTEGER,
 			allowNull: false,
 			references: {
-				model: "sets",
+				model: "Sets",
 				key: "id",
 			},
 		},
@@ -97,7 +92,7 @@ const permissions = db.define(
 			type: DataTypes.INTEGER,
 			allowNull: false,
 			references: {
-				model: "users",
+				model: "Users",
 				key: "id",
 			},
 		},
@@ -117,8 +112,11 @@ const permissions = db.define(
 	}
 );
 
+Words.belongsToMany(Sets, { through: Words_sets });
+Sets.belongsToMany(Words, { through: Words_sets });
+
 db.sync().then(() => {
 	console.log("Tables Created");
 });
 
-module.exports = { users, sets, words, words_sets, permissions };
+module.exports = { Users, Sets, Words, Words_sets, permissions };
