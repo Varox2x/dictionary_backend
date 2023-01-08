@@ -18,36 +18,11 @@ router.post("/", (req, res) => {
 	const userId = req.user.dataValues.id;
 
 	wordInstance
-		.createWord(name, definition, lvl)
+		.createWord(name, definition, lvl || 0, setName || "no set", userId)
 		.then((r) => {
-			const wordId = r.dataValues.id;
-			Sets.findOne({
-				where: {
-					name: setName || "no set",
-					user_id: userId,
-				},
-			})
-				.then((r) => {
-					const setId = r.dataValues.id;
-					console.log(`set id: ${setId}`);
-					wordInstance
-						.createWordSet_Connection(setId, wordId)
-						.then((r) => {
-							console.log(r);
-							res.send(name || definition);
-						})
-						.catch((r) => {
-							console.log(r);
-							res.sendStatus(403);
-						});
-				})
-				.catch((r) => {
-					console.log(r);
-					res.sendStatus(403);
-				});
+			res.send(r);
 		})
 		.catch((r) => {
-			console.log(r);
 			res.sendStatus(403);
 		});
 });

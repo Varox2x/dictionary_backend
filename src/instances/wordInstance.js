@@ -1,21 +1,23 @@
 const { Sets, Words, Words_sets } = require("../database/models");
 
-const createWord = async (name, definition, lvl) => {
-	const word = Words.build({ name: name, definition: definition, lvl: lvl });
-
-	return await word
-		.save()
+const createWord = async (name, definition, lvl, setName, user_id) => {
+	let set, word;
+	return Sets.findOne({ where: { user_id: user_id, name: setName } })
 		.then((r) => {
-			console.log("word added to database success :)");
-			console.log("//");
+			if (!r) throw "no such set";
 			return r;
 		})
-		.catch((r) => {
-			console.log("Failed while adding word :(");
-			console.log("//");
-			console.log(r);
-			throw "can't add word";
-		});
+		.then((r) => {
+			set = r;
+			return Words.create({ name: name, definition: definition, lvl: lvl });
+		})
+		.then((r) => {
+			word = r;
+			return set.addWords(word);
+		})
+        .catch(r => {
+            throw 'failed while adding word'
+        })
 };
 
 const createWordSet_Connection = async (set_id, word_id) => {
