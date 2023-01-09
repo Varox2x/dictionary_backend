@@ -5,7 +5,7 @@ const {
 	Words,
 	Words_sets,
 	Users,
-	permissions,
+	Permissions,
 } = require("../database/models");
 const setInstance = require("../instances/setInstance");
 const db = require("../database/databse");
@@ -79,34 +79,35 @@ router.post("/permissions/add", async (req, res) => {
 	if (!user || !setName) {
 		return res.sendStatus(400);
 	}
-	console.log(user);
-	console.log(setName);
-	const userId = req.user.dataValues.id;
-	const setRespons = await Sets.findOne({
-		where: { user_id: userId, name: setName },
+	const ownerUserId = req.user.dataValues.id;
+	let setId, permissionUserId;
+
+	Users.findOne({ raw: true, where: { email: user } }).then((r) => {
+		if (r.id) {
+			permissionUserId = r.id;
+		} else {
+			res.status(422);
+		}
 	});
-	const userResponse = await Users.findOne({ where: { email: user } });
-	if (!setRespons || !userResponse) {
-		return res.sendStatus(400);
-	}
-	const setId = setRespons.dataValues.id;
-	const permnissionuserId = userResponse.dataValues.id;
-	console.log("setId");
-	console.log(setId);
-	console.log("user:");
-	console.log(permnissionuserId);
-	permissionInstance
-		.createPermissions(permnissionuserId, setId, enableEdit)
+
+	Sets.findOne({ raw: true, where: { user_id: ownerUserId, name: setName } })
 		.then((r) => {
-			console.log(r);
-			res.sendStatus(200);
+			if (r.id) {
+				setId = r.id;
+			} else {
+				res.status(422);
+			}
+			setInstance
+				.createPermissions(permissionUserId, setId, enableEdit || false)
+				.then((r) => {
+					console.log(r);
+				})
+				.catch((r) => {
+					//permission exists
+					console.log(r);
+				});
 		})
-		.catch((r) => {
-			//wysli error
-			console.log("error:");
-			console.log(r);
-			return res.sendStatus(400);
-		});
+		.catch((r) => res.sendStatus(422));
 });
 
 router.get("/getOtherSet/:user/:setName", async (req, res) => {
@@ -114,48 +115,7 @@ router.get("/getOtherSet/:user/:setName", async (req, res) => {
 	if (!user || !setName) {
 		res.sendStatus(400);
 	}
-	console.log(user);
-	console.log(setName);
-	const userResponse = await Users.findOne({ where: { email: user } });
-	if (!userResponse) {
-		// wuslij info o braku usera
-		return res.sendStatus(400);
-	}
-	const permnissionuserId = userResponse.dataValues.id;
-	const setResponse = await Sets.findOne({
-		where: { user_id: permnissionuserId, name: setName },
-	});
-	if (!setResponse) {
-		//wyrzuc info o braku takiego zestawu
-		return res.sendStatus(400);
-	}
-	const setId = setResponse.dataValues.id;
-	const permissionResponse = await permissions.findOne({
-		where: { user_id: permnissionuserId, set_id: setId },
-	});
-	console.log(permissionResponse);
-	if (!permissionResponse) {
-		//wyrzucic blad brak uprawnien
-		return res.sendStatus(400);
-	}
-	const enableEdit = permissionResponse.dataValues.editable;
-	db.query(
-		`SELECT Words.name, Words.definition, Words.lvl FROM Words INNER JOIN Words_sets ON Words.id = Words_sets.WordId  INNER JOIN Sets ON Words_sets.SetId = Sets.id WHERE Sets.user_id = ${permnissionuserId} AND Sets.name = '${setName}'`,
-		[permnissionuserId, setName]
-	)
-		.then((r) => {
-			console.log(r[0]);
-			return res.send({
-				words: r[0],
-				enableEdit: enableEdit ? true : false,
-				setName: setName,
-				owner: user,
-			});
-		})
-		.catch((r) => {
-			console.log(r);
-			return res.sendStatus(422);
-		});
+	const userId = req.user.dataValues.id;
 });
 
 module.exports = router;

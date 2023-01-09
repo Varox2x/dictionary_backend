@@ -77,8 +77,8 @@ const Words_sets = db.define(
 // set_id - setreference
 // user_id - user we want to have permission
 
-const permissions = db.define(
-	"permissions",
+const Permissions = db.define(
+	"Permissions",
 	{
 		set_id: {
 			type: DataTypes.INTEGER,
@@ -98,8 +98,8 @@ const permissions = db.define(
 		},
 		enableEdit: {
 			type: DataTypes.BOOLEAN,
-			allowNull: false,
-			defaultValue: false,
+			allowNull: true,
+			defaultValue: null,
 		},
 	},
 	{
@@ -115,8 +115,9 @@ const permissions = db.define(
 Words.belongsToMany(Sets, { through: Words_sets });
 Sets.belongsToMany(Words, { through: Words_sets });
 
+
 db.sync().then(() => {
 	console.log("Tables Created");
 });
 
-module.exports = { Users, Sets, Words, Words_sets, permissions };
+module.exports = { Users, Sets, Words, Words_sets, Permissions };

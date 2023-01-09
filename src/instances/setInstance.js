@@ -1,4 +1,4 @@
-const { Sets, permissions } = require("../database/models");
+const { Sets, Permissions } = require("../database/models");
 
 const createSet = async (user_id, name) => {
 	const set = Sets.build({ user_id: user_id, name: name });
@@ -31,7 +31,7 @@ const getCurrentUserSet = async (user_id, name) => {
 };
 
 const createPermissions = async (user_id, set_id, enableEdit) => {
-	const permission = permissions.build({
+	const permission = Permissions.build({
 		user_id: user_id,
 		set_id: set_id,
 		enableEdit: enableEdit,
