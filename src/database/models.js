@@ -80,8 +80,8 @@ const Permissions = db.define("Permissions", {
 Words.belongsToMany(Sets, { through: Words_sets });
 Sets.belongsToMany(Words, { through: Words_sets });
 
-Words_sets.belongsToMany(Users, { through: Permissions });
-Users.belongsToMany(Words_sets, { through: Permissions });
+Sets.belongsToMany(Users, { through: Permissions });
+Users.belongsToMany(Sets, { through: Permissions });
 
 db.sync().then(() => {
 	console.log("Tables Created");
