@@ -1,20 +1,19 @@
-const { Sets, Permissions } = require("../database/models");
+const { Sets, Permissions, Users } = require("../database/models");
 
+//updated
 const createSet = async (user_id, name) => {
-	const set = Sets.build({ user_id: user_id, name: name });
-
-	return await set
-		.save()
-		.then((r) => {
-			console.log("set to database success :)");
-			console.log("//");
-			return r;
-		})
-		.catch((r) => {
-			console.log("Failed while adding set :(");
-			console.log("//");
-			throw "user exists";
-		});
+	let User;
+	return Users.findOne({ where: { id: user_id } }).then((r) => {
+		User = r;
+		console.log(r);
+		return User.createSet({ name: name })
+			.then((r) => {
+				console.log(r);
+			})
+			.catch((r) => {
+				throw r;
+			});
+	});
 };
 
 const getCurrentUserSet = async (user_id, name) => {

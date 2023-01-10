@@ -17,6 +17,7 @@ router.use((req, res, next) => {
 	res.sendStatus(401);
 });
 
+//creaying set for current user UPDATED
 router.post("/:setName", (req, res) => {
 	const { setName } = req.params;
 	console.log(setName);
@@ -29,6 +30,7 @@ router.post("/:setName", (req, res) => {
 		})
 		.catch((r) => res.sendStatus(403));
 });
+
 //get sets name /dictionary/set
 router.get("/", async (req, res) => {
 	const { page } = req.query;
