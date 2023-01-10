@@ -16,7 +16,6 @@ router.post("/register", (req, res) => {
 		})
 		.catch((r) => {
 			console.log("creating user error");
-			console.log(r);
 			res.status(403).send(r);
 		});
 });
