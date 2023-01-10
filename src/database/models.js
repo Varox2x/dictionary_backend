@@ -17,31 +17,17 @@ const Users = db.define(
 	{}
 );
 
-const Sets = db.define(
-	"Sets",
-	{
-		user_id: {
-			type: DataTypes.INTEGER,
-			allowNull: false,
-			references: {
-				model: "Users",
-				key: "id",
-			},
-		},
-		name: {
-			type: DataTypes.STRING,
-			allowNull: false,
-		},
+const Sets = db.define("Sets", {
+	name: {
+		type: DataTypes.STRING,
+		allowNull: false,
 	},
-	{
-		indexes: [
-			{
-				unique: true,
-				fields: ["user_id", "name"],
-			},
-		],
-	}
-);
+	is_public: {
+		type: DataTypes.BOOLEAN,
+		allowNull: false,
+		defaultValue: false,
+	},
+});
 
 const Words = db.define("Words", {
 	name: {
@@ -56,6 +42,11 @@ const Words = db.define("Words", {
 		type: DataTypes.INTEGER,
 		allowNull: false,
 		defaultValue: 0,
+	},
+	is_word: {
+		type: DataTypes.BOOLEAN,
+		allowNull: false,
+		defaultValue: true,
 	},
 });
 
@@ -73,48 +64,24 @@ const Words_sets = db.define(
 	}
 );
 
-//table permission
-// set_id - setreference
-// user_id - user we want to have permission
-
-const Permissions = db.define(
-	"Permissions",
-	{
-		set_id: {
-			type: DataTypes.INTEGER,
-			allowNull: false,
-			references: {
-				model: "Sets",
-				key: "id",
-			},
-		},
-		user_id: {
-			type: DataTypes.INTEGER,
-			allowNull: false,
-			references: {
-				model: "Users",
-				key: "id",
-			},
-		},
-		enableEdit: {
-			type: DataTypes.BOOLEAN,
-			allowNull: true,
-			defaultValue: null,
-		},
+const Permissions = db.define("Permissions", {
+	permissionsId: {
+		type: DataTypes.INTEGER,
+		primaryKey: true,
+		autoIncrement: true,
 	},
-	{
-		indexes: [
-			{
-				unique: true,
-				fields: ["user_id", "set_id"],
-			},
-		],
-	}
-);
+	permissions: {
+		type: DataTypes.STRING,
+		allowNull: false,
+		defaultValue: "EDITABLE",
+	},
+});
 
 Words.belongsToMany(Sets, { through: Words_sets });
 Sets.belongsToMany(Words, { through: Words_sets });
 
+Words_sets.belongsToMany(Users, { through: Permissions });
+Users.belongsToMany(Words_sets, { through: Permissions });
 
 db.sync().then(() => {
 	console.log("Tables Created");
