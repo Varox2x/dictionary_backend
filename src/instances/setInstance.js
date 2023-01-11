@@ -18,6 +18,7 @@ const createSet = async (user_id, name) => {
 	});
 };
 
+//updated
 const getCultivatedSetsNames = async (user_id, permissions) => {
 	if (!PERMISSIONS[permissions]) {
 		throw "no such permission";
@@ -34,47 +35,17 @@ const getCultivatedSetsNames = async (user_id, permissions) => {
 				},
 			},
 		],
-	}).then((r) => {
-		console.log("wartosci");
-		console.log(r[0]);
-		let response = r.map((setInfo) => {
-			return { name: setInfo["Sets.name"], pk: setInfo["Sets.id"] };
-		});
-		return response;
-	});
-};
-
-const getCurrentUserSet = async (user_id) => {
-	let set;
-	return Permissions.findAll({
-		where: { user_id: user_id, permissions: PERMISSIONS.OWNER },
-	}).then((r) => {
-		console.log(r);
-	});
-};
-
-const createPermissions = async (user_id, set_id, enableEdit) => {
-	const permission = Permissions.build({
-		user_id: user_id,
-		set_id: set_id,
-		enableEdit: enableEdit,
-	});
-
-	return await permission
-		.save()
+	})
 		.then((r) => {
-			console.log("permission to database success :)");
-			console.log("//");
-			return r;
+			let response = r.map((setInfo) => {
+				return { name: setInfo["Sets.name"], pk: setInfo["Sets.id"] };
+			});
+			return response;
 		})
 		.catch((r) => {
-			console.log("Failed while adding permission :(");
-			console.log("//");
-			throw "permission exists";
+			throw r;
 		});
 };
 
 exports.createSet = createSet;
 exports.getCultivatedSetsNames = getCultivatedSetsNames;
-exports.getCurrentUserSet = getCurrentUserSet;
-exports.createPermissions = createPermissions;

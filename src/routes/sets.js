@@ -50,71 +50,29 @@ router.get("/permissions/:permissions", async (req, res) => {
 	// });
 });
 
-router.get("/:setName", async (req, res) => {
-	const { setName } = req.params;
-	if (!setName) return res.sendStatus(422);
-	const userId = req.user.dataValues.id;
+// router.get("/:setName", async (req, res) => {
+// 	const { setName } = req.params;
+// 	if (!setName) return res.sendStatus(422);
+// 	const userId = req.user.dataValues.id;
 
-	await setInstance
-		.getCurrentUserSet(userId, setName)
-		.then((words) => {
-			const data = words.map((word) => {
-				return {
-					name: word.name,
-					definition: word.definition,
-					lvl: word.lvl,
-				};
-			});
-			res.send(data);
-		})
-		.catch((r) => {
-			console.log(r);
-			res.sendStatus(403);
-		});
-});
+// 	await setInstance
+// 		.getCurrentUserSet(userId, setName)
+// 		.then((words) => {
+// 			const data = words.map((word) => {
+// 				return {
+// 					name: word.name,
+// 					definition: word.definition,
+// 					lvl: word.lvl,
+// 				};
+// 			});
+// 			res.send(data);
+// 		})
+// 		.catch((r) => {
+// 			console.log(r);
+// 			res.sendStatus(403);
+// 		});
+// });
 
-router.post("/permissions/add", async (req, res) => {
-	const { user, setName, enableEdit } = req.body;
-	if (!user || !setName) {
-		return res.sendStatus(400);
-	}
-	const ownerUserId = req.user.dataValues.id;
-	let setId, permissionUserId;
 
-	Users.findOne({ raw: true, where: { email: user } }).then((r) => {
-		if (r.id) {
-			permissionUserId = r.id;
-		} else {
-			res.status(422);
-		}
-	});
-
-	Sets.findOne({ raw: true, where: { user_id: ownerUserId, name: setName } })
-		.then((r) => {
-			if (r.id) {
-				setId = r.id;
-			} else {
-				res.status(422);
-			}
-			setInstance
-				.createPermissions(permissionUserId, setId, enableEdit || false)
-				.then((r) => {
-					console.log(r);
-				})
-				.catch((r) => {
-					//permission exists
-					console.log(r);
-				});
-		})
-		.catch((r) => res.sendStatus(422));
-});
-
-router.get("/getOtherSet/:user/:setName", async (req, res) => {
-	const { user, setName } = req.params;
-	if (!user || !setName) {
-		res.sendStatus(400);
-	}
-	const userId = req.user.dataValues.id;
-});
 
 module.exports = router;
