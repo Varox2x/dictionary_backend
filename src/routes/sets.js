@@ -32,25 +32,22 @@ router.post("/:setName", (req, res) => {
 });
 
 //get sets name /dictionary/set
-router.get("/", async (req, res) => {
-	const { page } = req.query;
-	if (!page) return res.sendStatus(422);
+router.get("/permissions/:permissions", async (req, res) => {
+	const { permissions } = req.params;
+	if (!permissions) return res.sendStatus(422);
 	const userId = req.user.dataValues.id;
-	let userName = await Users.findOne({ where: { id: userId } });
-	console.log("userName.dataValues.email");
-	console.log(userName.dataValues.email);
-	let setsName = await Sets.findAndCountAll({
-		limit: 100,
-		offset: page * 100,
-		where: {
-			user_id: userId,
-		},
-	});
-	setsName.rows = setsName.rows.map(({ name }) => name);
-	res.send({
-		username: userName.email,
-		sets: setsName,
-	});
+	setInstance
+		.getCultivatedSetsNames(userId, permissions)
+		.then((r) => {
+			res.send(r);
+		})
+		.catch((r) => {
+			res.sendStatus(403);
+		});
+	// res.send({
+	// 	username: userName.email,
+	// 	sets: setsName,
+	// });
 });
 
 router.get("/:setName", async (req, res) => {

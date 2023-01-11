@@ -1,4 +1,6 @@
+const { where } = require("sequelize");
 const { Sets, Permissions, Users } = require("../database/models");
+const { PERMISSIONS } = require("../utils/ENUMS");
 
 //updated
 const createSet = async (user_id, name) => {
@@ -16,16 +18,38 @@ const createSet = async (user_id, name) => {
 	});
 };
 
-const getCurrentUserSet = async (user_id, name) => {
+const getCultivatedSetsNames = async (user_id, permissions) => {
+	if (!PERMISSIONS[permissions]) {
+		throw "no such permission";
+	}
+	return Users.findAll({
+		joinTableAttributes: ["selfGranted"],
+		where: { id: user_id },
+		raw: true,
+		include: [
+			{
+				model: Sets,
+				through: {
+					where: { permissions: permissions },
+				},
+			},
+		],
+	}).then((r) => {
+		console.log("wartosci");
+		console.log(r[0]);
+		let response = r.map((setInfo) => {
+			return { name: setInfo["Sets.name"], pk: setInfo["Sets.id"] };
+		});
+		return response;
+	});
+};
+
+const getCurrentUserSet = async (user_id) => {
 	let set;
-	return Sets.findOne({ where: { user_id: user_id, name: name } }).then((r) => {
-		set = r;
-		if (!r) throw "no such set";
-		return set
-			.getWords({ raw: true, attributes: ["name", "definition", "lvl"] })
-			.then((r) => {
-				return r;
-			});
+	return Permissions.findAll({
+		where: { user_id: user_id, permissions: PERMISSIONS.OWNER },
+	}).then((r) => {
+		console.log(r);
 	});
 };
 
@@ -51,5 +75,6 @@ const createPermissions = async (user_id, set_id, enableEdit) => {
 };
 
 exports.createSet = createSet;
+exports.getCultivatedSetsNames = getCultivatedSetsNames;
 exports.getCurrentUserSet = getCurrentUserSet;
 exports.createPermissions = createPermissions;

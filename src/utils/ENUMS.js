@@ -1,0 +1,9 @@
+const PERMISSIONS = {
+	OWNER: "OWNER",
+	EDITABLE: "EDITABLE",
+	FOLLOWE: "FOLLOWER",
+};
+
+module.exports = {
+	PERMISSIONS,
+};

@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize");
 const db = require("./databse");
+const { PERMISSIONS } = require("../utils/ENUMS");
 
 const Users = db.define(
 	"Users",
@@ -73,7 +74,7 @@ const Permissions = db.define("Permissions", {
 	permissions: {
 		type: DataTypes.STRING,
 		allowNull: false,
-		defaultValue: "EDITABLE",
+		defaultValue: PERMISSIONS.OWNER,
 	},
 });
 
