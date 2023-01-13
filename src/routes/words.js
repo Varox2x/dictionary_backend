@@ -1,6 +1,14 @@
 const { Router } = require("express");
 const router = Router();
-const { Words, Words_sets, Sets, Permissions } = require("../database/models");
+const { Op } = require("sequelize");
+
+const {
+	Words,
+	Words_sets,
+	Sets,
+	Permissions,
+	Users,
+} = require("../database/models");
 const wordInstance = require("../instances/wordInstance");
 const { PERMISSIONS } = require("../utils/ENUMS");
 
@@ -10,31 +18,44 @@ router.use((req, res, next) => {
 	res.sendStatus(401);
 });
 
+//to add word to set with owner or editable permissions
 router.post("/", (req, res) => {
-	const { name, definition, lvl, set_id } = req.body;
+	const { name, definition, lvl, set_id, is_word } = req.body;
 
-	if (!name && !definition) {
+	if ((!name && !definition) || !set_id) {
 		return res.sendStatus(422);
 	}
 	const userId = req.user.dataValues.id;
-
-	Permissions.findOne({ where: { UserId: userId, SetId: set_id, permissions: PERMISSIONS.OWNER } }).then(
-		(r) => {
-			if (!r) {
-				//no such set
-				return res.sendStatus(403);
-			}
-		}
-	);
-
-	wordInstance
-		.createWord(name, definition, lvl || 0, set_id, true)
+	let access, set;
+	Permissions.findOne({
+		where: {
+			UserId: userId,
+			SetId: set_id,
+			permissions: { [Op.in]: [PERMISSIONS.OWNER, PERMISSIONS.EDITABLE] },
+		},
+	})
 		.then((r) => {
-			console.log(r);
-			res.send(r);
+			access = r;
+			if (!access) {
+				console.log("No such set with permission");
+				res.sendStatus(422);
+			}
+			access.getSet().then((r) => {
+				set = r;
+				set
+					.createWord({
+						name: name || null,
+						definition: definition || null,
+						lvl: lvl || 0,
+						is_word: is_word || true,
+					})
+					.then((r) => {
+						res.send(r.toJSON());
+					});
+			});
 		})
 		.catch((r) => {
-			res.sendStatus(403);
+			res.sendStatus(422);
 		});
 });
 

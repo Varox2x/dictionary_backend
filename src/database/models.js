@@ -84,6 +84,10 @@ Sets.belongsToMany(Words, { through: Words_sets });
 Sets.belongsToMany(Users, { through: Permissions });
 Users.belongsToMany(Sets, { through: Permissions });
 
+Permissions.hasOne(Sets, {
+	foreignKey: "id",
+});
+
 db.sync().then(() => {
 	console.log("Tables Created");
 });
