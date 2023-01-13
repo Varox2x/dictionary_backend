@@ -1,5 +1,8 @@
 const { Router } = require("express");
 const router = Router();
+const { PERMISSIONS } = require("../utils/ENUMS");
+const { Op } = require("sequelize");
+
 const {
 	Sets,
 	Words,
@@ -17,7 +20,7 @@ router.use((req, res, next) => {
 	res.sendStatus(401);
 });
 
-//creaying set for current user UPDATED
+//creating set for current user UPDATED
 router.post("/:setName", (req, res) => {
 	const { setName } = req.params;
 	console.log(setName);
@@ -31,7 +34,7 @@ router.post("/:setName", (req, res) => {
 		.catch((r) => res.sendStatus(403));
 });
 
-//get sets name /dictionary/set
+//get sets name /dictionary/set in permission pass permission UPDATED
 router.get("/permissions/:permissions", async (req, res) => {
 	const { permissions } = req.params;
 	if (!permissions) return res.sendStatus(422);
@@ -50,29 +53,45 @@ router.get("/permissions/:permissions", async (req, res) => {
 	// });
 });
 
-// router.get("/:setName", async (req, res) => {
-// 	const { setName } = req.params;
-// 	if (!setName) return res.sendStatus(422);
-// 	const userId = req.user.dataValues.id;
+//get words from set UPDATED
+router.get("/:set_id", async (req, res) => {
+	const { set_id } = req.params;
 
-// 	await setInstance
-// 		.getCurrentUserSet(userId, setName)
-// 		.then((words) => {
-// 			const data = words.map((word) => {
-// 				return {
-// 					name: word.name,
-// 					definition: word.definition,
-// 					lvl: word.lvl,
-// 				};
-// 			});
-// 			res.send(data);
-// 		})
-// 		.catch((r) => {
-// 			console.log(r);
-// 			res.sendStatus(403);
-// 		});
-// });
+	if (!set_id) return res.sendStatus(422);
+	const userId = req.user.dataValues.id;
 
-
+	let access, set;
+	Permissions.findOne({
+		where: {
+			UserId: userId,
+			SetId: set_id,
+		},
+	})
+		.then((r) => {
+			access = r;
+			if (!access) {
+				console.log("No such set with permission");
+				res.sendStatus(422);
+			}
+			access.getSet().then((r) => {
+				set = r;
+				set.getWords({ raw: true }).then((r) => {
+					let words = r.map((word) => {
+						return {
+							id: word.id,
+							name: word.name,
+							definition: word.definition,
+							lvl: word.lvl,
+							is_word: word.is_word,
+						};
+					});
+					res.send(words);
+				});
+			});
+		})
+		.catch((r) => {
+			res.sendStatus(422);
+		});
+});
 
 module.exports = router;
