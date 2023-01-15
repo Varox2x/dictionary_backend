@@ -89,7 +89,8 @@ router.patch("/", (req, res) => {
 							return res.send(r);
 						})
 						.catch((r) => {
-							return res.sendStatus(422);
+							res.status(422);
+							return res.send(r);
 						});
 				});
 			}
