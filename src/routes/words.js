@@ -67,7 +67,7 @@ router.patch("/", (req, res) => {
 	let word_id = word.id;
 	delete word.id;
 	const userId = req.user.dataValues.id;
-	let access, set;
+	let access;
 	Permissions.findOne({
 		where: {
 			SetId: set_id,

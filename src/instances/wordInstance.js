@@ -53,7 +53,6 @@ const updateWord2 = async (data, id) => {
 const updateWord = async (set, word_id, data) => {
 	let word;
 	await wordValidation(data).catch((r) => {
-		console.log(r);
 		throw r;
 	});
 	return set.getWords({ where: { id: word_id } }).then((r) => {
