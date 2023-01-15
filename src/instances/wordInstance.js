@@ -26,29 +26,53 @@ let data = {
 	lvl: 3,
 	is_word: false,
 };
-const updateWord = async (data) => {
+const updateWord2 = async (data, id) => {
 	let word;
 	wordValidation(data).catch((r) => {
 		throw r;
 	});
-	return Words.findOne({ where: { id: 1 } }).then((r) => {
-		console.log(r);
-		if (r) {
-			word = r;
-			for (const [key, value] of Object.entries(data)) {
-				word[key] = value;
-			}
-			r.save({ raw: false })
-				.then((r) => {
-					console.log(r);
-				})
-				.catch((r) => {
-					console.log(r);
-				});
+	return Words.findOne({ where: { id: id } }).then((r) => {
+		if (!r) {
+			throw "";
 		}
+		word = r;
+		for (const [key, value] of Object.entries(data)) {
+			word[key] = value;
+		}
+		return r
+			.save({ raw: false })
+			.then((r) => {
+				return data;
+			})
+			.catch((r) => {
+				throw r;
+			});
 	});
 };
 
-updateWord(data);
+const updateWord = async (set, word_id, data) => {
+	let word;
+	wordValidation(data).catch((r) => {
+		throw r;
+	});
+	return set.getWords({ where: { id: word_id } }).then((r) => {
+		if (!r) {
+			throw "";
+		}
+		word = r[0];
+		for (const [key, value] of Object.entries(data)) {
+			word[key] = value;
+		}
+		return word
+			.save({ raw: false })
+			.then((r) => {
+				return data;
+			})
+			.catch((r) => {
+				throw r;
+			});
+	});
+};
 
 exports.createWord = createWord;
+exports.updateWord = updateWord;

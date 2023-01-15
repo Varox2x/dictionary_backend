@@ -59,4 +59,44 @@ router.post("/", (req, res) => {
 		});
 });
 
+router.patch("/", (req, res) => {
+	const { set_id, word } = req.body;
+	if (!set_id || !word || !word.id) {
+		return res.sendStatus(422);
+	}
+	let word_id = word.id;
+	delete word.id;
+	const userId = req.user.dataValues.id;
+	let access, set;
+	Permissions.findOne({
+		where: {
+			SetId: set_id,
+			UserId: userId,
+			permissions: { [Op.in]: [PERMISSIONS.OWNER, PERMISSIONS.EDITABLE] },
+		},
+	})
+		.then((r) => {
+			if (!r) {
+				// no permission
+				return res.sendStatus(422);
+			}
+			if (r) {
+				access = r;
+				access.getSet().then((r) => {
+					wordInstance
+						.updateWord(r, word_id, word)
+						.then((r) => {
+							return res.send(r);
+						})
+						.catch((r) => {
+							return res.sendStatus(422);
+						});
+				});
+			}
+		})
+		.catch((r) => {
+			return res.sendStatus(422);
+		});
+});
+
 module.exports = router;
