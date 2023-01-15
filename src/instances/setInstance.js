@@ -4,13 +4,13 @@ const { PERMISSIONS } = require("../utils/ENUMS");
 
 //updated
 const createSet = async (user_id, name) => {
-	let User;
+	let User, newSet;
 	return Users.findOne({ where: { id: user_id } }).then((r) => {
 		User = r;
-		console.log(r);
-		return User.createSet({ name: name })
+		return User.createSet({ raw: true, name: name })
 			.then((r) => {
-				console.log(r);
+				newSet = r.toJSON();
+				return { id: newSet.id, name: newSet.name };
 			})
 			.catch((r) => {
 				throw r;
@@ -38,7 +38,7 @@ const getCultivatedSetsNames = async (user_id, permissions) => {
 	})
 		.then((r) => {
 			let response = r.map((setInfo) => {
-				return { name: setInfo["Sets.name"], pk: setInfo["Sets.id"] };
+				return { name: setInfo["Sets.name"], id: setInfo["Sets.id"] };
 			});
 			return response;
 		})
@@ -46,8 +46,6 @@ const getCultivatedSetsNames = async (user_id, permissions) => {
 			throw r;
 		});
 };
-
-
 
 exports.createSet = createSet;
 exports.getCultivatedSetsNames = getCultivatedSetsNames;

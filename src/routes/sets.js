@@ -29,7 +29,7 @@ router.post("/:setName", (req, res) => {
 	setInstance
 		.createSet(userId, setName)
 		.then((r) => {
-			res.send(setName);
+			res.send(r);
 		})
 		.catch((r) => res.sendStatus(403));
 });
